@@ -1,0 +1,7 @@
+/data/
+.DS_Store
+/.idea/
+__pycache__
+/.env
+.ipynb_checkpoints
+.pytest_cache
