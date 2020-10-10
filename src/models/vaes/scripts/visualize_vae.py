@@ -2,7 +2,6 @@ import argparse
 import os.path as op
 
 from datasets import celeb
-from datasets import chairs3d
 from datasets import mini_imagenet84x84
 from datasets import anime
 import numpy as np
@@ -124,8 +123,6 @@ def get_dataset_from_train_config(train_config, with_write_order=False):
     write_order = 'bgr'
     if train_config['ds']['ds_path'] == base_settings.CELEB_DS_SETTINGS['ds_path']:
         dataset = celeb.get_celeb_ds_from_train_config(train_config)
-    elif train_config['ds']['ds_path'] == base_settings.CHAIRS3D_DS_SETTINGS['ds_path']:
-        dataset = chairs3d.get_chairs3d_ds_from_train_config(train_config)
     elif train_config['ds']['ds_path'] == base_settings.IMAGENET_DS_SETTINGS['ds_path']:
         dataset = mini_imagenet84x84.get_imagenet_ds_from_train_config(train_config)
         write_order = 'rgb'

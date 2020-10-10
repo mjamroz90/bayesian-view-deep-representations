@@ -10,7 +10,7 @@ import numpy as np
 import base_settings
 from src.transforms import get_test_transform
 from datasets.mini_imagenet import MiniImageNet
-from utils import file_system
+from utils import fs_utils
 from utils.logger import log
 
 BATCH_SIZE = 512
@@ -123,7 +123,7 @@ def choose_layers_indices(model_name):
 def main():
     args = parse_args()
 
-    file_system.create_dir_if_does_not_exist(args.out_dir)
+    fs_utils.create_dir_if_not_exists(args.out_dir)
 
     dataset_loader = get_test_dataset_loader(args.dataset)
     choose_subset_func = lambda arr: arr

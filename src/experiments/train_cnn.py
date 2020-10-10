@@ -36,15 +36,11 @@ from dotenv import load_dotenv
 from munch import munchify
 from torch import nn
 from torch.utils.data import DataLoader
-from torchvision.datasets import CIFAR10
 from tqdm import tqdm
 
-import base_settings
-from datasets.cifar10 import CIFAR10RandomLabels
 from src.optimizers.radam import RAdam
 from src.settings import NN_ARCHITECTURES
-from src.transforms import get_train_transform, get_test_transform
-from utils.file_system import read_json
+from utils import fs_utils
 from utils.metrics import accuracy
 
 load_dotenv()
@@ -223,7 +219,7 @@ def parse_options():
     """
     args = docopt(__doc__)
     if args["--config"]:
-        opts = read_json(args["--config"])
+        opts = fs_utils.read_json(args["--config"])
     else:
         opts = {k.replace("--", "", 1): v for k, v in args.items()}
         for k, v in opts.items():
@@ -239,22 +235,3 @@ def parse_options():
                         continue
     opts = munchify(opts)
     return opts
-
-
-def main():
-    opts = parse_options()
-    train_transform, test_transform = get_train_transform(base_settings.DATA_AUGMENTATION), get_test_transform()
-
-    train_dataset = CIFAR10RandomLabels(root=base_settings.DATA_ROOT, corrupt_prob=opts.corrupt_prob,
-                                        transform=train_transform, train=True, download=True)
-
-    test_dataset = CIFAR10(base_settings.DATA_ROOT, download=True, train=False, transform=test_transform)
-
-    mlflow.set_experiment(opts.experiment_name)
-
-    for i in range(opts.runs_count):
-        run_experiment(train_dataset, test_dataset, opts)
-
-
-if __name__ == '__main__':
-    main()

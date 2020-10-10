@@ -2,17 +2,15 @@ import argparse
 import os.path as op
 
 from datasets.celeb import CelebDataset
-from datasets.chairs3d import Chairs3dDataset
 from datasets.mini_imagenet84x84 import MiniImagenet84x84Dataset
 from datasets.anime import AnimeDataset
 
-from base_settings import CELEB_DS_SETTINGS, CHAIRS3D_DS_SETTINGS, IMAGENET_DS_SETTINGS, ANIME_DS_SETTINGS
+from base_settings import CELEB_DS_SETTINGS, IMAGENET_DS_SETTINGS, ANIME_DS_SETTINGS
 from src.models.vaes import trainers
 from src.models.vaes import vae_model
 from src.models.vaes import arch
 
 from datasets import celeb
-from datasets import chairs3d
 from datasets import mini_imagenet84x84
 from datasets import anime
 from utils import fs_utils
@@ -72,9 +70,6 @@ def dataset_create_func(args):
         dataset = CelebDataset(CELEB_DS_SETTINGS['ds_path'], args.batch_size,
                                CELEB_DS_SETTINGS['crop_size'], CELEB_DS_SETTINGS['image_size'],
                                CELEB_DS_SETTINGS['scale_img'], read_precomputed=True)
-    elif args.ds_type == 'chairs3d':
-        dataset = Chairs3dDataset(CHAIRS3D_DS_SETTINGS['ds_path'], args.batch_size,
-                                  CHAIRS3D_DS_SETTINGS['scale_img'])
     elif args.ds_type == 'anime':
         dataset = AnimeDataset(ANIME_DS_SETTINGS['ds_path'], args.batch_size, ANIME_DS_SETTINGS['scale_img'])
     else:
@@ -87,8 +82,6 @@ def dataset_create_func(args):
 def dataset_restore_func(train_args, ds_type):
     if ds_type == 'celeb':
         return celeb.get_celeb_ds_from_train_config(train_args)
-    elif ds_type == 'chairs3d':
-        return chairs3d.get_chairs3d_ds_from_train_config(train_args)
     elif ds_type == 'anime':
         return anime.get_anime_ds_from_train_config(train_args)
     else:
@@ -105,7 +98,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('out_weights_dir')
     parser.add_argument('beta', type=float)
-    parser.add_argument('ds_type', choices=['celeb', 'chairs3d', 'imagenet', 'anime'])
+    parser.add_argument('ds_type', choices=['celeb', 'imagenet', 'anime'])
     parser.add_argument('--arch', choices=['standard', 'bigger'], default='standard')
     parser.add_argument('--reg_type', choices=['kl', 'mmd-sq', 'mmd-imq'])
     parser.add_argument('--latent_dim', type=int, default=32)

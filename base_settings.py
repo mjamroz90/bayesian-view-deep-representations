@@ -34,12 +34,6 @@ CELEB_DS_SETTINGS = {
     'ds_path': 'data/celeb_ds'
 }
 
-CHAIRS3D_DS_SETTINGS = {
-    'batch_size': 64,
-    'scale_img': '0_to_1',
-    'ds_path': 'data/3dchairs_ds'
-}
-
 IMAGENET_DS_SETTINGS = {
     'batch_size': 64,
     'scale_img': '0_to_1',
