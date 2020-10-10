@@ -175,4 +175,5 @@ This script works similarly to ```estimate_entropy_from_clustering.py``` (```<in
 ### Conda environments
 
 - ```reproduce.yml``` - conda environment definition for network training and activation extraction,
-- ```tf_mkl.yml```  - conda environment definition for all other steps.
+- ```tf_mkl.yml```  - conda environment definition for estimating DP-GMM.
+- ```tf2.yml``` - conda environment for VAE-related experiments
