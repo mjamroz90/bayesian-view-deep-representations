@@ -36,19 +36,14 @@ def process_single_trace_result(trace_result):
 
 
 @logger.log
-def run_diagonality_calculate(beta_traces_dict, method):
+def run_diagonality_calculate(beta_traces_dict):
     result = {}
     for beta_val, beta_traces_files in beta_traces_dict.items():
         beta_result = {}
         for i, trace_file in enumerate(beta_traces_files):
-            if method == 'bhattacharyya':
-                diagonality_checker = diagonality.BhattacharyyaDistCalculator(trace_file)
-                trace_result = diagonality_checker.compute_bhattacharyya_dist_for_clusters()
-                processed_trace_result = process_single_trace_result(trace_result)
-            else:
-                dkl_calculator = diagonality.DKLCalculator(10**5, trace_file)
-                trace_result = dkl_calculator.calculate_joint_and_prod_dkl()
-                processed_trace_result = {'weighted_dist': float(trace_result)}
+            dkl_calculator = diagonality.DKLCalculator(10**5, trace_file)
+            trace_result = dkl_calculator.calculate_joint_and_prod_dkl()
+            processed_trace_result = {'weighted_dist': float(trace_result)}
 
             run_diagonality_calculate.logger.info("Running trace beta-val: %.2f, trace index: %d" % (beta_val, i))
             beta_result[op.basename(trace_file)] = processed_trace_result
@@ -66,7 +61,7 @@ def main():
     args = parse_args()
 
     beta_traces_dict = list_traces_for_betas(args.clustering_results_root_dir, args.init_iteration, args.interval)
-    final_result = run_diagonality_calculate(beta_traces_dict, args.method)
+    final_result = run_diagonality_calculate(beta_traces_dict)
     fs_utils.write_json(final_result, args.out_results_file)
 
 
@@ -75,7 +70,7 @@ def parse_args():
     parser.add_argument('clustering_results_root_dir')
     parser.add_argument('init_iteration', type=int)
     parser.add_argument('interval', type=int)
-    parser.add_argument('method', choices=['bhattacharyya',  'jtpom'])
+    parser.add_argument('method', choices=['jtpom'])
     parser.add_argument('out_results_file')
     return parser.parse_args()
 

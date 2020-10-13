@@ -1,45 +1,7 @@
 import tensorflow as tf
 
 from utils import logger
-from src.models.vaes import latent_space_sampler
 from src.models.vaes import conditional_latent_space_sampler
-
-
-@logger.log
-class BhattacharyyaDistCalculator(latent_space_sampler.LatentSpaceSampler):
-
-    def compute_bhattacharyya_dist_for_clusters(self):
-        result = {}
-        cluster_cov_chols = self.trace_obj['cluster_params']['cov_chol']
-        total_count = 0
-        for cluster_index, cluster_count in self.cluster_counts.items():
-            cluster_bhattacharyya_dist = self.__bhattacharyya_distance(cluster_cov_chols[cluster_index], cluster_count,
-                                                                       self.nu_0)
-            result[cluster_index] = {'dist': float(cluster_bhattacharyya_dist.numpy()), 'count': cluster_count}
-            self.logger.info("Computed bhattacharyya distance for cluster: %d/%d" % (cluster_index,
-                                                                                     len(self.cluster_counts)))
-            total_count += cluster_count
-
-        result['weighted_dist'] = sum([(float(x['count']) / float(total_count)) * x['dist'] for x in result.values()])
-        return result
-
-    @tf.function
-    def __bhattacharyya_distance(self, chol_cov, cluster_count, nu_0):
-        # chol_cov1 and chol_cov2 are lower triangular matrices - representing covariances of NIW posterior distribution
-        cov = tf.linalg.matmul(chol_cov, tf.transpose(chol_cov))
-        data_dim = cov.get_shape().as_list()[1]
-        div_factor = tf.constant(nu_0, dtype=tf.float32) + tf.cast(cluster_count, dtype=tf.float32) - tf.constant(
-            data_dim + 1., dtype=tf.float32)
-
-        iw_cov_mean = cov / div_factor
-        iw_cov_diag = tf.linalg.tensor_diag(tf.linalg.diag_part(iw_cov_mean))
-
-        cov_sum = (iw_cov_mean + iw_cov_diag) / tf.constant(2., dtype=tf.float32)
-
-        num = tf.linalg.logdet(cov_sum)
-        denom = 0.5 * (tf.linalg.logdet(iw_cov_mean) + tf.reduce_sum(tf.math.log(tf.linalg.diag_part(iw_cov_diag))))
-
-        return 0.5 * (num - denom)
 
 
 @logger.log

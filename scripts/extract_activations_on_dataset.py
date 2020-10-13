@@ -148,7 +148,7 @@ def main():
             np.save(op.join(args.out_dir, "%s.npy" % out_file), acts_to_save)
         if args.agg_mode == 'dump_all' or args.agg_mode == 'both':
             out_dir = op.join(args.out_dir, out_file)
-            file_system.create_dir_if_does_not_exist(out_dir)
+            fs_utils.create_dir_if_not_exists(out_dir)
             for i, i_model_acts in enumerate(li_out_activations):
                 acts_to_save = choose_subset_func(i_model_acts)
                 model_index = int(op.splitext(op.basename(models_paths[i]))[0].split('_')[-1])

@@ -38,7 +38,6 @@ from torch import nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from src.optimizers.radam import RAdam
 from src.settings import NN_ARCHITECTURES
 from utils import fs_utils
 from utils.metrics import accuracy

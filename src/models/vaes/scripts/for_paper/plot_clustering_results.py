@@ -106,9 +106,6 @@ def main():
         betas_relative_entropies = read_betas_results_from_json(args.root_dir, 'entropy_relative.json',
                                                                 combine_both_vaes)
         plot_entropies(betas_relative_entropies, args.out_plot_file, plot_title, not combine_both_vaes)
-    elif args.plot_type == 'diagonality_bhat':
-        betas_diagonality = read_betas_results_from_json(args.root_dir, 'diagonality_bhat.json', combine_both_vaes)
-        plot_diagonality(betas_diagonality, args.out_plot_file, 'bhat', plot_title, not combine_both_vaes)
     elif args.plot_type == 'diagonality_jtpom':
         betas_diagonality = read_betas_results_from_json(args.root_dir, 'diagonality_jtpom.json', combine_both_vaes)
         plot_diagonality(betas_diagonality, args.out_plot_file, 'jtpom', plot_title, not combine_both_vaes)
@@ -122,8 +119,8 @@ def main():
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('plot_type', choices=['cluster_counts', 'relative_entropy', 'diagonality_bhat',
-                                              'diagonality_jtpom'], help='Type of data to plot')
+    parser.add_argument('plot_type', choices=['cluster_counts', 'relative_entropy', 'diagonality_jtpom'],
+                        help='Type of data to plot')
     parser.add_argument('root_dir', help='List of root directories with clustering results')
     parser.add_argument('out_plot_file', help='Output plot file name')
     parser.add_argument('--plot_title')
