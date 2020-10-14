@@ -1,4 +1,4 @@
-Here we describe steps to replicate our experiments with CNNs. All of the commands described below should be executed from the project's main directory. dataset,
+Here we describe steps to replicate our experiments with CNNs. All of the commands described below should be executed from the project's main directory.
 
 ## Anaconda environments
 
@@ -23,7 +23,7 @@ This script trains the ```net_name``` network in 3 variants:
 - permuted (random) labels.
 Parameter ```dataset``` can take two values: ```cifar``` or ```imagenet```.
 
-For each of these 3 variant, a set of 50 instances (with different initial weight values) will be trained. By default training will be carried out for 30 epochs (one can change that by setting ```[epochs_num]``` argument). Argument ```<net_name>``` can be set to one of the values defined under NN_ARCHITECTURES in ```src/settings.py```. All training artifacts are stored in ```mlruns``` directory created in the current directory. Each variant is stored in a following folder structure:
+For each of these 3 variants, a set of 50 instances (with different initial weight values) will be trained. By default training will be carried out for 30 epochs (one can change that by setting ```[epochs_num]``` argument). Argument ```<net_name>``` can be set to one of the values defined under NN_ARCHITECTURES in ```src/settings.py```. All training artifacts are stored in ```mlruns``` directory created in the current directory. Each variant is stored in a following folder structure:
 ```
 mlruns
   - 0/
@@ -55,72 +55,46 @@ It will copy all 50 models into ```<out_models_dir>```  directory:
 
 A following command will calculate activation vectors for models stored in ```<models_dir>``` folder:
 ```
-python scripts/extract_activations_on_dataset.py <net_name> <models_dir> <dataset> <out_activations_dir> --agg_mode both
+python scripts/extract_activations_on_dataset.py <net_name> <models_dir> <dataset> <out_activations_dir> --agg_mode aggregate
 ```
-After executing the above command, folder ```out_activations_dir``` will contain activations collected across all 50 net instances, as well as activations for each instance individually. The structure should look like this:
+After executing the above command, folder ```out_activations_dir``` will contain activations collected across all 50 net instances. The structure should look like this:
 ```
 <out_activations_dir>
-   - avg_pooling_0_acts/
    - avg_pooling_0_acts.npy
    ...
-   - avg_pooling_10_acts/
    - avg_pooling_10_acts.npy
 ```
 
 ### Dimensionality reduction
 
-With activation vectors calculated, one can start reducing their dimensionality using SVD. Our scripts are prepared for parallel execution under SLURM cluster management system. However, one can treat SLURM scripts just like ```bash``` scripts and execute them one by one from a console. There are special comments inside SLURM scripts that are interpreted by SLURM to allocate required hardware resources - this comments indicate how much memory is (roughly) needed to execute the command and how many CPU cores it can efficiently consume. SLURM tasks are submitted with ```sbatch``` command, which takes as an argument a SLURM script that contains commands to execute. Again: SLURM is **not** required to run these tasks - one can instead run them one by one from a console, just like ```bash``` scripts.
+With activation vectors calculated, one can start reducing their dimensionality using SVD, with script: ```scripts/do_dim_reduction_with_svd.py```.
+An example call that invokes the reduction can be found below:
+```
+python scripts/do_dim_reduction_with_svd.py <in_array_file> <out_array_file> --axis 0 --num_features <dim>
+```
+Argument ```<in_array_file>``` stands for the path with activations taken from specific layer (eg. avg_pooling_10_acts.npy).
+Above script saves the reduced-dimensionality array to ```<out_array_file>``` (eg. avg_pooling_10_acts_ld.npy), the output
+dimension is equal to ```<dim>```. Value of ```<dim>``` for a  given layer - used in our experiments, can be taken from ```ld_8.json``` or
+```ld_11.json``` which contains these values for networks having 8 and 11 convolutional layers respectively.
 
-A following command prepare ```sbatch``` scripts for reducing the dimensionality of activation vectors: 
-```
-python scripts/datamunging/sbatch_cmds/prepare_eigact_svd_reduction_cmds.py <act_dir_1> <act_dir_2> ... <act_dir_n> <out_root_dir> <out_sbatch_cmds_dir> <dim_config_json> <suffix>
-```
-One can list multiple directories with extracted activations (```<act_dir_*>```). ```<out_root_dir>``` is a directory under which ```sbatch``` scripts will store results. The scripts themselves will be stored in ```<out_sbatch_cmds_dir>``` directory, which has a following structure:
-```
-<out_sbatch_cmds_dir>
-   - 0.sh
-   - 1.sh
-   - 2.sh
-   ...
-   - <10>.sh
-```
-```<dim_config_json>``` is a JSON file containing mapping between layer indices and the number of dimensions. It should be ```ld_11.json``` for networks with 11 convolutions and ```ld_8.json``` for networks with 8 convolutions.
-
-Dimensionality reduction scripts generate output in a following way:
-- Let's assume that there are three folders with input activations: ```true_labels```, ```true_labels_aug``` ```random_labels```
-- Results will then be written to following folders:
-```
-<out_root_dir>
-   - true_labels_<suffix>/
-   - true_labels_aug_<suffix>/
-   - random_labels_<suffix>/
-```
-each one with a content like:
-```
-<out_root_dir>/true_labels_ld
-   - avg_pooling_0_acts_eigact.npy
-   - avg_pooling_1_acts_eigact.npy
-   ...
-   - avg_pooling_10_acts_eigact.npy
-```
-As a suffix one can use e.g.: ```ld``` (which is assumed by the result analysis scripts).
+Such script needs to be invoked for each layer of the given network variant (true labels, true labels with augmentation, random labels), so for
+the experiment involving 11-layer network the number of calls will be equal to 33. We recommend to put these commands into
+some bash script which will execute them one by one.
 
 ## DP-GMM model estimation
 
-Similarly to the previous step, DP-GMM model estimation is done with SLURM scripts (which can be run sequentially from a console, without SLURM). In order to prepare necessary scripts, one has to run:
+DP-GMM model estimation can be done with ```scripts/do_clustering_on_npy_arr.py``` script. This script should be called in a following way:
 ```
-python scripts/datamunging/sbatch_cmds/prepare_eigact_clustering_cmds.py <eigact_dir_1> <eigact_dir_2> ... <eigact_dir_n> <out_results_dir> <out_sbatch_cmds_dir>
+python scripts/do_clustering_on_npy_arr.py <in_activations_npy_file> <out_dir> shared --max_clusters_num <init_clusters_num> --iterations_num 600 --init_type init_data_stats
 ```
-Each input folder ```<eigact_dir_*>``` must contain activations for all layers (it could be e.g. ```true_labels_ld``` directory from the previous step).
 
-Assuming that input directories are ```<path_to_eigenacts>/true_labels_ld```, ```<path_to_eigenacts>/true_labels_aug_ld```, ```<path_to_eigenacts>/random_labels_ld```, the structure of the output folders (after running the SLURM script) will look like:
-```
-<out_results_dir>
-   - true_labels_ld/
-   - true_labels_aug_ld/
-   - random_labels_ld/
-```
-and each output folder will contain trace of Gibbs Sampling steps for each network layer (i.e clusters assignments, parameters of various probability distributions, etc.).
+```<in_activations_npy_file>``` is a path to numpy array with layers activations (of reduced dimensionality - see previous step),
+```<init_clusters_num>``` is the initial number of components that Collapsed Gibbs Sampler assigns to data points.
+In our experiments this value is calculated ```<init_clusters_num> = int(np.log2(1 + n_samples)```, where
+```n_samples``` is the size of the dataset. For instance, dataset with activations of 50 trained networks, coming
+from layer having 512 convolutional filters, will have a size of ```25600 = 50*512```, so ```<init_clusters_num>``` should be set to ```14```.
+Traces produced during the Gibbs Sampling execution will be stored in a ```<out_dir>``` directory. Each trace contains various
+quantities like clusters assignments, parameters of various probability distributions, etc.
 
 ## Summarizing DP-GMM traces
 
@@ -143,7 +117,7 @@ In order to estimate relative entropy values from DP-GMM traces, execute a follo
 ```
 python scripts/results_analysis/estimate_entropy_from_clustering.py <clustering_results_root_dir> <init_iteration> <step> --entropy_type relative
 ```
-Where ```<init_iteration>``` is an integer indicating beginning of the sequence of Gibbs steps used for entropy estimation (preceding steps are considered brun-in period) and ```<step>``` is an integer indicating how many steps to omit between any two steps used for estimation (chain thinning). The script will calculate mean, minimum and maximum value over the sampled Gibbs steps.
+Where ```<init_iteration>``` is an integer indicating beginning of the sequence of Gibbs steps used for entropy estimation (preceding steps are considered burn-in period) and ```<step>``` is an integer indicating how many steps to omit between any two steps used for estimation (chain thinning). The script will calculate mean, minimum and maximum value over the sampled Gibbs steps.
 
 This script assumes that ```<clustering_results_root_dir>``` contains clustering results for a single network in up to three variants: true labels, true labels + image augmentation and random labels. These results should be stored in the following folders:  
 ```
