@@ -6,9 +6,8 @@ from datasets import mini_imagenet84x84
 from datasets import anime
 import numpy as np
 import tensorflow as tf
-from src.models.vaes import arch
 
-from src.models.vaes import vae_model
+from src.models.vaes.scripts.train_vae import create_model
 from utils import fs_utils
 from utils import logger
 from utils import img_ops
@@ -107,18 +106,6 @@ class VaeVisualizer(object):
         return result_imgs[:how_many]
 
 
-def get_model_func(train_config, input_shape):
-    if train_config['arch'] == 'standard':
-        arch_func = lambda: arch.create_arch_func(input_shape, train_config['latent_dim'])
-    else:
-        arch_func = lambda: arch.create_bigger_arch_func(input_shape, train_config['latent_dim'], False)
-
-    vae_model_obj = vae_model.StandardVae(input_shape, train_config['latent_dim'], arch_func=arch_func,
-                                          delta_val=train_config['delta'])
-
-    return vae_model_obj
-
-
 def get_dataset_from_train_config(train_config, with_write_order=False):
     write_order = 'bgr'
     if train_config['ds']['ds_path'] == base_settings.CELEB_DS_SETTINGS['ds_path']:
@@ -146,7 +133,7 @@ def main():
     dataset, write_order = get_dataset_from_train_config(train_config, with_write_order=True)
 
     input_shape = (args.how_many, dataset.img_size(), dataset.img_size(), 3)
-    vae_model_obj = get_model_func(train_config, input_shape)
+    vae_model_obj = create_model(train_config, input_shape, False)
 
     visualizer = VaeVisualizer(vae_model_obj, args.how_many, dataset, train_config, write_order)
 

@@ -32,11 +32,8 @@ python src/models/vaes/scripts/generate_latent_codes_on_test_set.py <model_path>
 
 ### Running DP-GMM on latent codes
 
-Following command prepares SLURM scripts that estimate DP-GMM posteriors for sets of VAE latent codes:
-```
-python src/models/vaes/scripts/clustering/prepare_clustering_cmds.py <latent_codes_dir> <out_results_dir> <out_scripts_dir> --iters_num 2000
-```
-The scripts are saved in ```<out_scripts_dir>``` folder. Note that one does **not** need SLURM to run these scripts: they can be run in a ```bash``` console, just like normal ```bash``` scripts. For more details on SLURM scripts see the instruction for CNN experiments. ```<latent_codes_dir>``` should contain files with latent codes for evaluated beta values (see previous step). DP-GMM traces for each beta will be stored in ```<out_results_dir>```.
+After generating latent codes (for specific beta) one should run a DP-GMM estimation in exactly the same way as in case of CNNs.
+Keep in mind that such estimation should be performed for each of the beta value in desired beta range.
 
 ### Estimating entropy values from DP-GMM traces (Beta-VAEs)
 
@@ -66,7 +63,7 @@ This script works exactly like ```estimate_entropy_from_clustering.py```, except
 
 To generate samples using latent codes drawn from the posterior predictive density, run:
 ```
-python src/models/vaes/scripts/clustering/generate_samples_from_clusters.py <vae_model_path> <trace_path> <out_vis_path> --mode [joint_mixture | factorial_mixture]
+python src/models/vaes/scripts/clustering/generate_samples_from_clusters.py <vae_model_path> <trace_path> <out_vis_path> --mode [joint_mixture | factorial_mixture] --grid_size 8x8
 ```
 Encoder/decoder parameters are loaded from ```<vae_model_path>``` file. DP-GMM components structure is read from ```<trace_path>``` CGS step. Generated samples are saved in ```<out_vis_path>``` folder. Last argument indicate whether latent codes should be drawn from the posterior predictive (```joint_mixture```) or its factorial mixture approximation (```factorial_mixture```).
 

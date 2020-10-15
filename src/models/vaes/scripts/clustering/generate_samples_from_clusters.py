@@ -6,7 +6,7 @@ import cv2
 from scipy import special
 import numpy as np
 
-from src.models.vaes.scripts import visualize_vae
+from src.models.vaes.scripts import train_vae
 from src.models.vaes import latent_space_sampler
 from src.models.vaes import conditional_latent_space_sampler
 from datasets import celeb
@@ -164,7 +164,7 @@ def main():
     train_config = fs_utils.read_json(op.join(op.dirname(args.vae_model_path), 'config.json'))
 
     input_shape = (args.how_many_per_cluster, train_config['ds']['image_size'], train_config['ds']['image_size'], 3)
-    vae_model_obj = visualize_vae.get_model_func(train_config, input_shape)
+    vae_model_obj = train_vae.create_model(train_config, input_shape, False)
 
     if args.how_many_per_cluster and args.grid_size:
         raise ValueError("Specify either --how_many_per_cluster or --grid_size")

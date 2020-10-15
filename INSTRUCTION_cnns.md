@@ -2,15 +2,18 @@ Here we describe steps to replicate our experiments with CNNs. All of the comman
 
 ## Anaconda environments
 
-There are two Anaconda environments required to conduct CNN experiments: ```reproduce``` and ```tf_mkl```. To create these environments from the ```*.yml``` files (provided with the code), run:
+There are three Anaconda environments required to conduct CNN experiments: ```reproduce```, ``tf_mkl``` and ```tf2```.
+To create these environments from the ```*.yml``` files (provided with the code), run:
 ```
-conda env create -f [reproduce.yml | tf_mkl.yml]
+conda env create -f [reproduce.yml | tf_mkl.yml | tf2.yml]
 ```
 Before running any command described below, activate a proper environment by executing:
 ```
-conda activate [reproduce | tf_mkl]
+conda activate [reproduce | tf_mkl | tf2]
 ```
-The ```reproduce``` environment is used only to train CNN models and extract activations from them. All other steps should be done in the ```tf_mkl``` environment.
+The ```reproduce``` environment is used only to train CNN models and extract activations from them.
+The purpose of ```tf_mkl``` is to run DP-GMM estimation algorithm, and ```tf2``` is used to run the estimation
+of entropy values and component counts.
 
 ## Training networks
 To train a set of networks with a given architecture (on a given dataset), run:

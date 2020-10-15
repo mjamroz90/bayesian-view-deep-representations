@@ -16,6 +16,21 @@ from datasets import anime
 from utils import fs_utils
 
 
+def create_model(train_args, input_shape, trainable):
+    if train_args['arch'] == 'bigger' and train_args['reg_type'] == 'kl':
+        dec_sigma_sq = 0.3
+    else:
+        dec_sigma_sq = 1.0
+
+    if train_args['arch'] == 'standard':
+        arch_func = lambda: arch.create_arch_func(input_shape, train_args['latent_dim'])
+    else:
+        arch_func = lambda: arch.create_bigger_arch_func(input_shape, train_args['latent_dim'], trainable)
+
+    vae_model_obj = vae_model.StandardVae(arch_func, dec_sigma_sq=dec_sigma_sq, delta_val=train_args['delta'])
+    return vae_model_obj
+
+
 def train_celeb_vae(args):
     if args.restore_model_path:
         train_args = fs_utils.read_json(op.join(op.dirname(args.restore_model_path), 'config.json'))
@@ -39,24 +54,14 @@ def train_celeb_vae(args):
 
     dataset.batch_size = args.batch_size
     input_shape = (dataset.batch_size, dataset.img_size(), dataset.img_size(), 3)
-    dec_sigma_sq, z_sigma_sq = 1., 1.
 
-    if train_args['arch'] == 'bigger' and train_args['reg_type'] == 'kl':
-        dec_sigma_sq = 0.3
-
+    z_sigma_sq = 1.
     if train_args['reg_type'].startswith('mmd'):
         z_sigma_sq = 2.
 
     train_args.update({'z_sigma_sq': z_sigma_sq})
 
-    if train_args['arch'] == 'standard':
-        arch_func = lambda: arch.create_arch_func(input_shape, train_args['latent_dim'])
-    else:
-        arch_func = lambda: arch.create_bigger_arch_func(input_shape, train_args['latent_dim'], True)
-
-    vae_model_obj = vae_model.StandardVae(input_shape, args.latent_dim, arch_func, dec_sigma_sq=dec_sigma_sq,
-                                          delta_val=train_args['delta'])
-
+    vae_model_obj = create_model(train_args, input_shape, True)
     fs_utils.create_dir_if_not_exists(args.out_weights_dir)
 
     fs_utils.write_json(train_args, op.join(args.out_weights_dir, 'config.json'))

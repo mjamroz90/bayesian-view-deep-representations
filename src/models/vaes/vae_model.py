@@ -6,7 +6,7 @@ from src.models.vaes import delta_vae
 from utils import fs_utils
 
 
-class VaeModel(object):
+class VaeModel:
     __metaclass__ = abc.ABCMeta
 
     def __init__(self):
@@ -60,11 +60,9 @@ class VaeModel(object):
 
 class StandardVae(VaeModel):
 
-    def __init__(self, input_shape, latent_dim, arch_func, delta_val=None, dec_sigma_sq=1.):
-        super().__init__()
+    def __init__(self, arch_func, delta_val=None, dec_sigma_sq=1.):
+        super(StandardVae, self).__init__()
 
-        self.input_shape = input_shape
-        self.latent_dim = latent_dim
         self.delta_val = delta_val
         self.dec_sigma_sq = dec_sigma_sq
 
