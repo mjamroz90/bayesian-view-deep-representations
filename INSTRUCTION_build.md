@@ -1,4 +1,4 @@
-In order to run DP-GMM model estimation, one must build a small native library (implementing Cholesky updates for cov matrices). 
+In order to run DP-GMM model estimation, one must build a small native library that implements Cholesky updates for cov matrices. 
 To compile that lib, first enable ```tf_mkl``` environment:
 ```
 conda activate tf_mkl
