@@ -2,7 +2,7 @@ Here we describe steps to reproduce our experiments with CNNs. All of the comman
 
 ## Anaconda environments
 
-There are three Anaconda environments required to conduct CNN experiments: ```reproduce```, ``tf_mkl``` and ```tf2```.
+There are three Anaconda environments required to conduct CNN experiments: ```reproduce```, ```tf_mkl``` and ```tf2```.
 To create these environments from the ```*.yml``` files (provided with the code), run:
 ```
 conda env create -f [reproduce.yml | tf_mkl.yml | tf2.yml]
@@ -75,11 +75,11 @@ With activation vectors calculated, one can start reducing their dimensionality 
 python scripts/do_dim_reduction_with_svd.py <in_array_file> <out_array_file> --axis 0 --num_features <dim>
 ```
 Argument ```<in_array_file>``` is a path to a file with activation vectors (eg. ```avg_pooling_10_acts.npy```).
-Results (i.e. reduced-dimensionality representations) are saved in ```<out_array_file>``` (eg. ```avg_pooling_10_acts_ld.npy```), the output
+Results (i.e. reduced-dimensionality representations) are saved in ```<out_array_file>``` (eg. ```avg_pooling_10_acts_ld.npy```). The output
 dimensionality is equal to ```<dim>```. Per-layer dimensionality used in our experiments can be found in: ```ld_8.json``` or
 ```ld_11.json``` (for newtorks with 8 and 11 convolutional layers, respectively).
 
-This script needs to be invoked for each layer iand each network variant (true labels, true labels with augmentation, random labels, etc).
+This script needs to be invoked for each layer and each network variant (true labels, true labels with augmentation, random labels, etc).
 
 ## DP-GMM model estimation
 

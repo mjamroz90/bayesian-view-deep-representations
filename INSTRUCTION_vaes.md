@@ -53,7 +53,7 @@ This script works exactly like ```estimate_entropy_from_clustering.py```, except
 
 ### Calculating latent dimensions coupling from DP-GMM traces (Beta-VAEs)
 
-To estimate the degree of latent dimensions coupling (total correlation between dimensions of posterior predictive), run:
+To estimate the degree of latent dimensions coupling (total correlation between dimensions in posterior predictive), run:
 ```
 python src/models/vaes/scripts/clustering/calculate_diagonality_of_representation.py <clustering_results_root_dir> <init_iteration> <step> jtpom <out_json_file>
 ```
