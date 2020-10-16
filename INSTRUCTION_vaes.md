@@ -1,4 +1,4 @@
-Here we describe steps to replicate our experiments with Beta-VAEs and MMD-VAEs. All of the commands described below should be executed from the project's main directory.
+Here we describe steps to reproduce our experiments with Beta-VAEs and MMD-VAEs. All of the commands described below should be executed from the project's main directory.
 
 ## Anaconda environments
 
@@ -32,16 +32,16 @@ python src/models/vaes/scripts/generate_latent_codes_on_test_set.py <model_path>
 
 ### Running DP-GMM on latent codes
 
-After generating latent codes (for specific beta) one should run a DP-GMM estimation in exactly the same way as in case of CNNs.
-Keep in mind that such estimation should be performed for each of the beta value in desired beta range.
+After generating latent codes (for specific beta) one should run a DP-GMM estimation in exactly the same way as in the case of CNNs.
+Keep in mind that such estimation should be performed separately for each beta value.
 
-### Estimating entropy values from DP-GMM traces (Beta-VAEs)
+### Estimating relative entropy values from DP-GMM traces (Beta-VAEs)
 
 Let's assume that folders with DP-GMM traces for evaluated beta values are stored in ```<clustering_results_root_dir>```. In order to estimate relative entropy values, one should run:
 ```
 python src/models/vaes/scripts/clustering/estimate_entropy_from_clustering.py <clustering_results_root_dir> <init_iteration> <step> <out_json_file>
 ```
-Relative entropies for all beta values will be collected in a single JSON file: ```<out_json_file>```. Parameter ```<init_iteration>``` is an integer indicating beginning of the sequence of Gibbs steps used for entropy estimation (preceding steps are considered brun-in period) and ```<step>``` is an integer indicating how many steps to omit between any two steps used for estimation (chain thinning).
+Relative entropies for all beta values will be collected in a single JSON file: ```<out_json_file>```. Parameter ```<init_iteration>``` is an integer indicating start of the sequence of Gibbs steps used for entropy estimation (preceding steps are considered brun-in period) and ```<step>``` is an integer indicating how many steps to omit between any two steps used for estimation (chain thinning).
 
 ### Calculating component counts from DP-GMM traces (Beta-VAEs)
 
@@ -53,11 +53,11 @@ This script works exactly like ```estimate_entropy_from_clustering.py```, except
 
 ### Calculating latent dimensions coupling from DP-GMM traces (Beta-VAEs)
 
-To estimate degree of latent dimensions coupling (KL divergence between joint posterior and its product of marginals approximation), run:
+To estimate the degree of latent dimensions coupling (total correlation between dimensions of posterior predictive), run:
 ```
 python src/models/vaes/scripts/clustering/calculate_diagonality_of_representation.py <clustering_results_root_dir> <init_iteration> <step> jtpom <out_json_file>
 ```
-This script works exactly like ```estimate_entropy_from_clustering.py```, except that it calculates KL divergence between posterior predictive distribution and its product of marginals approximation.
+This script works exactly like ```estimate_entropy_from_clustering.py```, except that it calculates KL divergence between the posterior predictive distribution and its product of marginals approximation.
 
 ### Generating samples from predictive density
 
