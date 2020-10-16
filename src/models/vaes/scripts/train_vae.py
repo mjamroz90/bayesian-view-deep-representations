@@ -31,7 +31,7 @@ def create_model(train_args, input_shape, trainable):
     return vae_model_obj
 
 
-def train_celeb_vae(args):
+def train_vae(args):
     if args.restore_model_path:
         train_args = fs_utils.read_json(op.join(op.dirname(args.restore_model_path), 'config.json'))
         train_args['restore_model_path'] = args.restore_model_path
@@ -96,7 +96,7 @@ def dataset_restore_func(train_args, ds_type):
 def main():
     args = parse_args()
     fs_utils.create_dir_if_not_exists(args.out_weights_dir)
-    train_celeb_vae(args)
+    train_vae(args)
 
 
 def parse_args():
